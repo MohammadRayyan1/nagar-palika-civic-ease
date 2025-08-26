@@ -25,7 +25,7 @@ function LoginPage() {
       navigate("/citizen-dashboard", { state: { user } });
     } else if (user.u_role === "admin") {
       localStorage.setItem("user", JSON.stringify(user));
-      navigate("/admin-dashboard", { state: { user } });
+      navigate("/admin", { state: { user } });
     }
   };
 

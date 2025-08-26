@@ -7,6 +7,7 @@ function CitizenDashboard() {
   const [complaints, setComplaints] = useState([]);
   const navigate = useNavigate();
   const location = useLocation();
+  const [search, setSearch] = useState(""); // 🔍 state for search
 
   // Get user from location state OR localStorage
   const loggedInUser = location.state?.user || JSON.parse(localStorage.getItem("user"));
@@ -39,6 +40,19 @@ function CitizenDashboard() {
 
   if (!loggedInUser) return null; // prevents rendering before redirect
 
+
+  // 🔎 filter complaints based on search text
+  const filteredComplaints = complaints.filter((c) => {
+    const text = search.toLowerCase();
+    return (
+      c.u_number?.toLowerCase().includes(text) ||
+      c.u_name?.toLowerCase().includes(text) ||
+      c.u_category?.toLowerCase().includes(text) ||
+      c.u_description?.toLowerCase().includes(text) ||
+      c.u_status?.toLowerCase().includes(text)
+    );
+  });
+
   return (
     <div className="dashboard-container">
       <h2>Citizen Dashboard</h2>
@@ -46,6 +60,16 @@ function CitizenDashboard() {
       <button onClick={() => navigate("/complaint", { state: { user: loggedInUser } })}>
         Create Complaint
       </button>
+
+      {/* 🔍 Search Box */}
+      <input
+        type="text"
+        placeholder="Search complaints..."
+        value={search}
+        onChange={(e) => setSearch(e.target.value)}
+        style={{ flex: 1, padding: "8px" }}
+      />
+
       <button
         className="logout-btn"
         onClick={() => {
@@ -57,7 +81,7 @@ function CitizenDashboard() {
       </button>
 
       <h3>Your Complaints</h3>
-      {complaints.length === 0 ? (
+      {filteredComplaints.length === 0 ? (
         <p>No complaints found.</p>
       ) : (
         <table>
@@ -67,17 +91,25 @@ function CitizenDashboard() {
               <th>Name</th>
               <th>Category</th>
               <th>Description</th>
+              <th>Photo</th>
               <th>Status</th>
               <th>Date</th>
             </tr>
           </thead>
           <tbody>
-            {complaints.map((c) => (
+            {filteredComplaints.map((c) => (
               <tr key={c.sys_id}>
                 <td>{c.u_number}</td>
                 <td>{c.u_name}</td>
                 <td>{c.u_category}</td>
                 <td>{c.u_description}</td>
+                <td>
+                  {c.u_photo ? (
+                    <img src={c.u_photo} alt="Complaint" width="100" />
+                  ) : (
+                    "No Photo"
+                  )}
+                </td>
                 <td className={`status-${c.u_status.toLowerCase().replace(" ", "")}`}>
                   {c.u_status}
                 </td>
